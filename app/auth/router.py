@@ -1,5 +1,4 @@
 """Authentication API routes."""
-from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status

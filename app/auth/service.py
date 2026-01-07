@@ -77,3 +77,4 @@ class AuthService:
     async def cleanup_expired_tokens(db: AsyncSession) -> None:
         """Clean up expired refresh tokens (can be run periodically)."""
         await db.execute(delete(RefreshToken).where(RefreshToken.expires_at < utcnow()))
+        await db.flush()

@@ -1,5 +1,5 @@
 """Authentication service layer."""
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.security import create_refresh_token
 from app.models.models import RefreshToken, User
+
+
+def utcnow() -> datetime:
+    """Return current UTC time as timezone-naive datetime for database compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class AuthService:
@@ -17,7 +22,7 @@ class AuthService:
         db: AsyncSession, user_id: int, token: str
     ) -> RefreshToken:
         """Create a new refresh token record in database."""
-        expires_at = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        expires_at = utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
         db_token = RefreshToken(
             user_id=user_id,
             token=token,
@@ -42,7 +47,7 @@ class AuthService:
     async def revoke_refresh_token(db: AsyncSession, token: RefreshToken) -> None:
         """Revoke a refresh token."""
         token.is_revoked = True
-        token.revoked_at = datetime.utcnow()
+        token.revoked_at = utcnow()
         await db.flush()
 
     @staticmethod
@@ -56,7 +61,7 @@ class AuthService:
         tokens = result.scalars().all()
         for token in tokens:
             token.is_revoked = True
-            token.revoked_at = datetime.utcnow()
+            token.revoked_at = utcnow()
         await db.flush()
 
     @staticmethod
@@ -76,9 +81,7 @@ class AuthService:
     @staticmethod
     async def cleanup_expired_tokens(db: AsyncSession) -> None:
         """Clean up expired refresh tokens (can be run periodically)."""
-        result = await db.execute(
-            select(RefreshToken).where(RefreshToken.expires_at < datetime.utcnow())
-        )
+        result = await db.execute(select(RefreshToken).where(RefreshToken.expires_at < utcnow()))
         tokens = result.scalars().all()
         for token in tokens:
             await db.delete(token)

@@ -1,4 +1,5 @@
 """Authentication API routes."""
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
@@ -140,9 +141,7 @@ async def refresh_token(
         )
 
     # Check if token is expired
-    from datetime import datetime
-
-    if db_token.expires_at < datetime.utcnow():
+    if db_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token expired",

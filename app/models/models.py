@@ -1,15 +1,11 @@
 """Database models."""
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.security import utcnow
 from app.db.session import Base
-
-
-def utcnow() -> datetime:
-    """Return current UTC time as timezone-naive datetime for database compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class User(Base):

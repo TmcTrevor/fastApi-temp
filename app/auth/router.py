@@ -9,7 +9,7 @@ from app.auth.dependencies import get_current_user
 from app.auth.schemas import LoginRequest, MessageResponse, TokenResponse
 from app.auth.service import AuthService
 from app.core.config import settings
-from app.core.security import create_access_token, create_refresh_token, decode_token
+from app.core.security import create_access_token, create_refresh_token, decode_token, utcnow
 from app.db.session import get_db
 from app.models.models import User
 from app.users.schemas import UserCreate, UserResponse
@@ -141,7 +141,7 @@ async def refresh_token(
         )
 
     # Check if token is expired
-    if db_token.expires_at < datetime.now(timezone.utc).replace(tzinfo=None):
+    if db_token.expires_at < utcnow():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token expired",

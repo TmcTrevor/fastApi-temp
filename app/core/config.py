@@ -38,9 +38,11 @@ class Settings(BaseSettings):
     @property
     def allowed_origins_list(self) -> List[str]:
         """Get ALLOWED_ORIGINS as a list."""
+        if isinstance(self.ALLOWED_ORIGINS, list):
+            return self.ALLOWED_ORIGINS
         if isinstance(self.ALLOWED_ORIGINS, str):
             return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
-        return self.ALLOWED_ORIGINS
+        return []
 
     @property
     def database_url_asyncpg(self) -> str:

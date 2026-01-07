@@ -17,6 +17,11 @@ pwd_context = CryptContext(
 )
 
 
+def utcnow() -> datetime:
+    """Return current UTC time as timezone-naive datetime for database compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
     return pwd_context.verify(plain_password, hashed_password)

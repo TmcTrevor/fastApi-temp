@@ -1,17 +1,12 @@
 """Authentication service layer."""
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.security import create_refresh_token
+from app.core.security import create_refresh_token, utcnow
 from app.models.models import RefreshToken, User
-
-
-def utcnow() -> datetime:
-    """Return current UTC time as timezone-naive datetime for database compatibility."""
-    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class AuthService:
@@ -81,8 +76,4 @@ class AuthService:
     @staticmethod
     async def cleanup_expired_tokens(db: AsyncSession) -> None:
         """Clean up expired refresh tokens (can be run periodically)."""
-        result = await db.execute(select(RefreshToken).where(RefreshToken.expires_at < utcnow()))
-        tokens = result.scalars().all()
-        for token in tokens:
-            await db.delete(token)
-        await db.flush()
+        await db.execute(delete(RefreshToken).where(RefreshToken.expires_at < utcnow()))

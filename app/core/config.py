@@ -35,13 +35,12 @@ class Settings(BaseSettings):
     COOKIE_DOMAIN: str | None = None
     COOKIE_HTTPONLY: bool = True
 
-    @field_validator("ALLOWED_ORIGINS", mode="before")
-    @classmethod
-    def parse_origins(cls, v: str) -> List[str]:
-        """Parse comma-separated origins into a list."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v
+    @property
+    def allowed_origins_list(self) -> List[str]:
+        """Get ALLOWED_ORIGINS as a list."""
+        if isinstance(self.ALLOWED_ORIGINS, str):
+            return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
+        return self.ALLOWED_ORIGINS
 
     @property
     def database_url_asyncpg(self) -> str:

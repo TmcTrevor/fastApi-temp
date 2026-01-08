@@ -1,5 +1,5 @@
 """Core configuration settings using Pydantic v2."""
-from typing import List
+from typing import List, Literal
 
 from pydantic import PostgresDsn, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     # Cookie Settings
     COOKIE_SECURE: bool = True
-    COOKIE_SAMESITE: str = "lax"
+    COOKIE_SAMESITE: Literal['lax', 'strict', 'none'] = "lax"
     COOKIE_DOMAIN: str | None = None
     COOKIE_HTTPONLY: bool = True
 
